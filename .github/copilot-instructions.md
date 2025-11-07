@@ -1,31 +1,104 @@
 ---
 applyTo: "**/*.py"
 ---
-# Copilot 项目准则
+# GitHub Copilot Demo Project - AI Agent Instructions
 
-## 代码规范
+## Project Overview
 
-- 所有函数都应包含类型注解（使用 Python type hints）
-- 对可能抛出异常的操作需增加错误处理
-- 每个函数应该有清晰的文档字符串（docstring）
-- 使用有意义的变量名和函数名
+This is a **demonstration project** designed to showcase GitHub Copilot capabilities. The codebase intentionally contains issues (see `calculator.py`) for demonstrating AI-assisted fixes. The project structure follows GitHub best practices with CI/CD, Issue templates, and MCP integration.
 
-## 测试规范
+**Key Files:**
+- `calculator.py` - Core logic (intentionally has bugs for demo purposes)
+- `tests/test_calculator.py` - pytest test suite
+- `.vscode/mcp.json` - GitHub MCP Server configuration
+- `.github/workflows/test.yml` - CI/CD with multi-version Python testing
+- `DEMO_GUIDE.md` - Step-by-step demonstration instructions
 
-- 测试文件命名需以 `test_` 开头
-- 每个函数至少应该有一个测试用例
-- 测试应该覆盖正常情况和边界情况
-- 使用 pytest 框架进行测试
+## Architecture & Design Decisions
 
-## 错误处理
+### Intentional "Flaws" (Do Not Auto-Fix Without Context)
+The project contains deliberate issues for demonstration:
+- `divide()` function lacks zero-division handling (Issue #1 demonstration)
+- Functions missing type hints (Issue #2 demonstration)
+- Incomplete test coverage for edge cases (Issue #3 demonstration)
 
-- 除法操作必须处理除以零的情况
-- 对于不合法的输入应抛出有意义的异常
-- 异常消息应该清晰描述问题
+**Before fixing**: Check if the user wants to preserve demo state or implement production fixes.
 
-## 代码风格
+## Development Workflows
 
-- 遵循 PEP 8 代码风格指南
-- 使用 4 个空格进行缩进
-- 函数之间使用两个空行分隔
-- 导入语句应该分组并按字母顺序排列
+### Setup & Testing
+```bash
+# Initial setup (automated)
+./setup.sh  # Creates venv, installs deps, runs tests
+
+# Manual testing
+source venv/bin/activate
+pytest tests/ -v --cov=. --cov-report=term-missing
+```
+
+### GitHub Integration via MCP
+This project uses MCP Server for GitHub integration. To interact with GitHub Issues/PRs:
+```
+@github List open issues in yimingwang123/github-demos
+@github Create PR to fix issue #1
+```
+
+**MCP Configuration**: `.vscode/mcp.json` requires GitHub PAT with `repo`, `read:user`, `read:project` scopes.
+
+## Code Conventions
+
+### Python Standards
+- **Type Hints**: All production functions require type annotations
+  ```python
+  def add(a: int | float, b: int | float) -> int | float:
+  ```
+- **Docstrings**: Use Google-style docstrings for all public functions
+- **Error Handling**: Raise `ValueError` with descriptive messages (e.g., divide-by-zero)
+- **PEP 8**: 4-space indentation, 2 blank lines between functions, sorted imports
+
+### Testing Patterns (pytest)
+- Test files: `tests/test_*.py`
+- Coverage requirement: Each function needs ≥3 test cases (normal, edge, error)
+- Example from `test_calculator.py`:
+  ```python
+  def test_add():
+      assert add(2, 3) == 5      # Normal case
+      assert add(-1, 1) == 0     # Edge: negatives
+      assert add(0, 0) == 0      # Edge: zeros
+  ```
+
+### Commit Message Format
+Follows `.github/instructions/commit.instructions.md`:
+```
+特性: Add type hints to calculator functions
+修复文件: calculator.py
+
+修复: Handle division by zero error
+修复文件: calculator.py, tests/test_calculator.py
+```
+
+## CI/CD Integration
+
+GitHub Actions workflow (`.github/workflows/test.yml`) runs on:
+- Push to `main` or `develop` branches
+- Pull requests targeting those branches
+- Tests against Python 3.9, 3.10, 3.11
+- Generates coverage reports (uploads to Codecov on Python 3.11)
+
+## Project-Specific Patterns
+
+### Demo Mode vs. Production Mode
+- **Demo Mode** (default): Preserve intentional bugs for demonstration
+- **Production Mode**: Apply fixes when user explicitly requests or creates PR
+
+### Issue-Driven Development
+Reference `ISSUE_TEMPLATES.md` and `DEMO_GUIDE.md` for typical workflows:
+1. List issues via `@github`
+2. Analyze issue context
+3. Implement fix with tests
+4. Create PR with descriptive commit message
+
+### Dependencies
+- `pytest` - Testing framework
+- `pytest-cov` - Coverage reporting
+- No external calculation libraries (intentionally simple for demos)
